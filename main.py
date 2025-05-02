@@ -1,31 +1,60 @@
+import datetime
 from src.utils.recoder import listen
 from src.utils.ai import AI
 from src.skills.search import Search
-import datetime
-
-
+from src.skills.weather import Weather
 DEV = True
 
 
-def main():
-    if not DEV:
+def get_user_prompt():
+    if DEV:
+        return input("What is your command? ")
+    else:
         voice_command = listen()
-        if not voice_command: 
-            print("couldnt get the voicew")
+        if not voice_command:
+            print("Couldn't get the voice command.")
+            return None
+        return voice_command
+
+def main():
+    prompt = get_user_prompt()
+    if not prompt:
+        return
+
+    ai = AI("mistral", "src/prompts/system_prompt.txt")
+    response = ai.get_intent(prompt)
+    print(response)
+    functions_list = response.get("function_called", dict())
+
+    print(functions_list)
+    result = ""
     
-    ai = AI("mistral", "src/system_prompt.md")
-    command = input("what is your command? ")
+    for action in functions_list:
+        for key, value in action.items():
+            if "search" in key.lower():
+                search = Search()
+                content = search.search(value)
 
-    # response = ai.get_intent(command)
+                if len(content) > 5000:
+                    content = content[:5000]
 
-    # if response["action"]["type"] == "search_internet":
-    #     pass
- 
-    search = Search(command)
-    print(search.search())
+                result += content
 
-    print(ai.get_ai_response("search in the given data for any information related with the following querry creating a short summary: " + command + " the the data is the following: " ,"".join(search.search())))
-
+            if "weather" in key.lower():
+                weather = Weather()
+                result += weather.get_weather(value)
 
 
-main()
+    final_result = f"The result of the action is the following data:\n{result}"
+
+    ai_personality = ""
+
+    user_res = f"""
+    memory: {""}
+    function response: {final_result}
+    """
+
+    print(user_res)
+
+if __name__ == "__main__":
+    main()

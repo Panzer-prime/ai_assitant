@@ -2,25 +2,30 @@ import ollama
 from ollama import ChatResponse
 import json
 import os
+from pydantic import BaseModel
+
+
+class output(BaseModel):
+    response: str
+    functions_called: list[dict[str, str]]
 
 
 class AI:
     def __init__(self, model, pathToPrompt):
 
+        self.model = model
         self.system_prompt = self.get_system_prompt(pathToPrompt)
         self.model = model
 
 
     def get_intent(self, prompt):
-        content: ChatResponse = ollama.chat(self.model, messages=[{
+        response: ChatResponse = ollama.chat(self.model, messages=[{
             "role": "user",
             "content": self.system_prompt + prompt
-        }])
+        }],
+        format="json")
 
-
-        response = json.loads(content.message.content)
-
-        return response
+        return json.loads(response.message.content)
     
     
     def get_system_prompt(self, pathToPrompt):
@@ -38,10 +43,10 @@ class AI:
         response: ChatResponse = ollama.chat(self.model, messages=[{
             "role": "user",
             "content": prompt + data
-        }])
+        }],
+        format="json")
 
-
-        return response.message.content
+        return json.loads(response.message.content)
 
 
 
