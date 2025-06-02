@@ -1,10 +1,21 @@
-import datetime
+import time
+import psutil
+import pyautogui
 from src.utils.recoder import listen
 from src.utils.ai import AI
-from src.skills.search import Search
-from src.skills.weather import Weather
+
+from src.plugin.load_plugins import load_plugins
 DEV = True
 
+
+def dispatch(intent, param):
+    plugins = load_plugins()
+    value = ""
+    for plugin in plugins:
+        if plugin.can_run(intent):
+           
+           value =  plugin.run(param)
+    return value
 
 def get_user_prompt():
     if DEV:
@@ -17,6 +28,8 @@ def get_user_prompt():
         return voice_command
 
 def main():
+    
+
     prompt = get_user_prompt()
     if not prompt:
         return
@@ -31,24 +44,13 @@ def main():
     
     for action in functions_list:
         for key, value in action.items():
-            if "search" in key.lower():
-                search = Search()
-                content = search.search(value)
-
-                if len(content) > 5000:
-                    content = content[:5000]
-
-                result += content
-
-            if "weather" in key.lower():
-                weather = Weather()
-                result += weather.get_weather(value)
+            result = result + dispatch(key.lower().strip(), value)
+                       
 
 
     final_result = f"The result of the action is the following data:\n{result}"
 
-    ai_personality = ""
-
+    
     user_res = f"""
     memory: {""}
     function response: {final_result}

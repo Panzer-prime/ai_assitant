@@ -3,8 +3,9 @@ from dotenv import load_dotenv
 from pathlib import Path
 import requests
 import json
+from src.plugin.base_plugin import BasePluging
 
-class Weather():
+class Weather(BasePluging):
     def __init__(self):
         load_dotenv()
         self.api_key = os.getenv("WEATHER_KEY")
@@ -32,4 +33,10 @@ class Weather():
         print(response_data["main"]['temp'], response_data["main"]['feels_like'])
         
         return f"Weather in the required place: {location} is currently {response_data["main"]['temp']} celcius but feels like {response_data["main"]['feels_like']} "
- 
+    
+
+    def run(self):
+        self.get_weather()
+
+    def can_run(self,value: str):
+        return value == "weather"

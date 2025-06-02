@@ -2,8 +2,9 @@ from bs4 import BeautifulSoup
 import requests
 import urllib.parse
 from trafilatura import fetch_url, extract
+from src.plugin.base_plugin import BasePluging
 
-class Search:
+class Search(BasePluging):
 
     def get_links(self, querry, max_results = 5):
         headers = {"User-Agent": "Mozilla/5.0"}
@@ -33,5 +34,11 @@ class Search:
 
         return content
     
-    def search(self, querry):
+    def run(self, querry):
+
+        print("we are running")
         return self.scrapp_websites(self.get_links(querry))
+
+    def can_run(self,value: str):
+        return value == "search"
+    
