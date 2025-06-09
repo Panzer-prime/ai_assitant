@@ -7,6 +7,8 @@ from src.plugin.base_plugin import BasePluging
 
 class Weather(BasePluging):
     def __init__(self):
+        self.name = "weather"
+        self.description = "function used to find the current weather of a place"
         load_dotenv()
         self.api_key = os.getenv("WEATHER_KEY")
         self.limit = 5

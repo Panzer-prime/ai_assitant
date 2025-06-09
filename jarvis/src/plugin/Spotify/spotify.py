@@ -8,7 +8,9 @@ from src.plugin.base_plugin import BasePluging
 
 class Spotify(BasePluging): 
     def __init__(self):
-
+        self.name = "spotify"
+        self.description = "function used to change the music currently plaing on spotify"
+        
         load_dotenv()
 
         self.scope = "user-read-playback-state user-modify-playback-state user-read-currently-playing playlist-read-private"

@@ -3,16 +3,14 @@ import psutil
 import pyautogui
 from src.utils.recoder import listen
 from src.utils.ai import AI
-
+from src.utils.utils import create_metadata_file
 from src.plugin.load_plugins import load_plugins
 DEV = True
 
 
-def dispatch(intent, param):
-    plugins = load_plugins()
+def dispatch(intent, param, plugins):
     value = ""
     for plugin in plugins:
-        print(value)
         if plugin.can_run(intent):
            value =  plugin.run(param)
     return value
@@ -29,14 +27,15 @@ def get_user_prompt():
 
 def main():
     
-
+    Ai = AI("mistral", "jarvis/src/prompts/system_prompt.txt")
+    plugins = load_plugins()
+    create_metadata_file(plugins)
     prompt = get_user_prompt()
     if not prompt:
         return
 
-    ai = AI("mistral", "jarvis/src/prompts/system_prompt.txt")
-    response = ai.get_intent(prompt)
-    print(response)
+   
+    response = Ai.get_intent(prompt)
     functions_list = response.get("function_called", dict())
 
     print(functions_list)
@@ -44,7 +43,7 @@ def main():
     
     for action in functions_list:
         for key, value in action.items():
-            result = result + str(dispatch(key.lower().strip(), value))
+            result = result + str(dispatch(key.lower().strip(), value, plugins))
                        
 
 
@@ -60,3 +59,5 @@ def main():
 
 if __name__ == "__main__":
     main()
+
+

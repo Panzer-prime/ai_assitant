@@ -3,9 +3,78 @@ import requests
 import urllib.parse
 from trafilatura import fetch_url, extract
 from src.plugin.base_plugin import BasePluging
-from src.utils.utils import RAG
+
+from sentence_transformers import SentenceTransformer  # type: ignore
+import numpy as np
+import faiss
+import math
+import json
+
+class RAG:
+    def __init__(self):
+        self.model = SentenceTransformer("all-MiniLM-L6-v2")
+
+    def embed_text(self, text: str):
+        chunks = [chunk.strip() for chunk in text.split(".") if chunk.strip()]
+        embeddings = self.model.encode(chunks, show_progress_bar=True)
+        return chunks, embeddings
+
+    def build_index(self, embeddings):
+        embedding_matrix = np.array(embeddings)
+
+        faiss.normalize_L2(embedding_matrix)  
+        index = faiss.IndexFlatIP(embedding_matrix.shape[1])  
+        index.add(embedding_matrix)
+        return index
+
+    def search(self, query: str, index, chunks, top_k=5):
+        query_embedding = self.model.encode([query])
+        faiss.normalize_L2(query_embedding) 
+
+        distances, indices = index.search(query_embedding, top_k)
+
+        results = []
+        for idx in indices[0]:
+            results.append(chunks[idx])
+        return results
+    
+
+    def search_cos(self, query, embedings, chunks, top_k = 5):
+        query_embeding = self.model.encode([query])
+        faiss.normalize_L2(query_embeding)
+
+        results = []
+        for i, vec in enumerate(embedings):
+            similarity = self.cosine_similarity(query, vec)
+            results.append((chunks[i], similarity))
+
+        results.sort(key = lambda x: x[1], reverse=True)[:top_k]
+        return results
+
+
+    def cosine_similarity(self, vec1, vec2):
+
+        sum = 0
+        for x, y in zip(vec1, vec2):
+            sum += x * y
+        
+        return sum/ (self.magnitude(vec1) * self.magnitude(vec2))
+
+    def magnitude(self, X):
+        sum_squares = 0
+        for i in X:
+            sum_squares += i ** 2
+        
+        return math.sqrt(sum_squares)
+    
+
+
 
 class Search(BasePluging):
+    
+    def __init__(self):
+        self.name = "search"
+        self.description = "function that user can use to seach top 5 results of a particular subject on interest e.g searching information about dogs"
 
     def get_links(self, querry, max_results = 5):
         headers = {"User-Agent": "Mozilla/5.0"}
@@ -31,7 +100,6 @@ class Search(BasePluging):
             result = fetch_url(site["url"])
             text = extract(result)
             content += str(text)
-            content += "Next Search Result\n"
 
         return content
     

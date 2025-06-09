@@ -1,0 +1,5 @@
+{
+    "search": "function that user can use to seach top 5 results of a particular subject on interest e.g searching information about dogs",
+    "spotify": "function used to change the music currently plaing on spotify",
+    "weather": "function used to find the current weather of a place"
+}

@@ -3,6 +3,7 @@ import os
 import importlib
 import inspect
 from src.plugin.base_plugin import BasePluging
+
 PLUGIN_PATH = "jarvis/src/plugin"
 
 
@@ -22,7 +23,6 @@ def load_plugins():
             spec = importlib.util.spec_from_file_location(module_name, filepath)
             module = importlib.util.module_from_spec(spec)
             spec.loader.exec_module(module)
-
 
             for _, obj in inspect.getmembers(module):
                 if inspect.isclass(obj) and issubclass(obj, BasePluging) and obj is not BasePluging:
