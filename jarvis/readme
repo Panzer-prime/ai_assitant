@@ -1,0 +1,34 @@
+## Project name: Moon
+# About 
+ai agen in the style of jarvis from the marvel univers but with a sassy attitudune and slight more annoying to work but still helpfull. the ai should be able to search on the internet write/ read files, open apps on my computer and play music
+
+# 📝 To-Do:
+
+-  Dynamic Intent Identification and Plugin Correlation System
+
+- [] Dynamic intent identification and correlation with the plugin system
+    What I need to do is, for each plugin, add an extra field: name and description.
+    Then, when I load these plugins, I generate a JSON file.
+    After that, using FAISS, I create an index and, using cosine similarity, I get the top N results.
+    Then I use the LLM to get a better filter, best working for the command.
+
+
+
+# Done
+- start implementing the RAG  system 
+    1. create the emmebeding generator( transform the text got from the internet in numerical expresions)
+    2. index the emmebedings 
+    3. implement the retrieval and search 
+
+
+
+# Fucntions to be implement to the ai agent 
+
+-search
+-weather
+-location
+-play
+-pause
+-read_mail
+-youtube
+-none

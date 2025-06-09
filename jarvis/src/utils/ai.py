@@ -2,13 +2,6 @@ import ollama
 from ollama import ChatResponse
 import json
 import os
-from pydantic import BaseModel
-
-
-class output(BaseModel):
-    response: str
-    functions_called: list[dict[str, str]]
-
 
 class AI:
     def __init__(self, model, pathToPrompt):

@@ -12,8 +12,8 @@ def dispatch(intent, param):
     plugins = load_plugins()
     value = ""
     for plugin in plugins:
+        print(value)
         if plugin.can_run(intent):
-           
            value =  plugin.run(param)
     return value
 
@@ -34,7 +34,7 @@ def main():
     if not prompt:
         return
 
-    ai = AI("mistral", "src/prompts/system_prompt.txt")
+    ai = AI("mistral", "jarvis/src/prompts/system_prompt.txt")
     response = ai.get_intent(prompt)
     print(response)
     functions_list = response.get("function_called", dict())
@@ -44,7 +44,7 @@ def main():
     
     for action in functions_list:
         for key, value in action.items():
-            result = result + dispatch(key.lower().strip(), value)
+            result = result + str(dispatch(key.lower().strip(), value))
                        
 
 

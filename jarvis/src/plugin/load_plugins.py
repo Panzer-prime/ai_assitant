@@ -3,7 +3,7 @@ import os
 import importlib
 import inspect
 from src.plugin.base_plugin import BasePluging
-PLUGIN_PATH = "src/plugin"
+PLUGIN_PATH = "jarvis/src/plugin"
 
 
 def load_plugins():

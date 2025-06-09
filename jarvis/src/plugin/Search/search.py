@@ -3,6 +3,7 @@ import requests
 import urllib.parse
 from trafilatura import fetch_url, extract
 from src.plugin.base_plugin import BasePluging
+from src.utils.utils import RAG
 
 class Search(BasePluging):
 
@@ -35,9 +36,15 @@ class Search(BasePluging):
         return content
     
     def run(self, querry):
+        print("do we even run ")
+        r = RAG()
+        text = self.scrapp_websites(self.get_links(querry))
 
-        print("we are running")
-        return self.scrapp_websites(self.get_links(querry))
+        chunks, embedings = r.embed_text(text)
+        index = r.build_index(embedings)
+        results =  r.search(querry, index, chunks)
+        print(results)
+        return results
 
     def can_run(self,value: str):
         return value == "search"
