@@ -1,19 +1,10 @@
-import time
-import psutil
-import pyautogui
 from src.utils.recoder import listen
 from src.utils.ai import AI
-from src.utils.utils import create_metadata_file
-from src.plugin.load_plugins import load_plugins
+from src.utils.utils import create_availble_functions
+from src.plugin.load_plugins import fetch_runner_refs
 DEV = True
 
 
-def dispatch(intent, param, plugins):
-    value = ""
-    for plugin in plugins:
-        if plugin.can_run(intent):
-           value =  plugin.run(param)
-    return value
 
 def get_user_prompt():
     if DEV:
@@ -22,32 +13,30 @@ def get_user_prompt():
         voice_command = listen()
         if not voice_command:
             print("Couldn't get the voice command.")
-            return None
+            return ""
         return voice_command
 
 def main():
     
-    Ai = AI("mistral", "jarvis/src/prompts/system_prompt.txt")
-    plugins = load_plugins()
-    create_metadata_file(plugins)
+    Ai = AI("mistral", "jarvis/src/prompts/system_prompt.txt")    
     prompt = get_user_prompt()
-    if not prompt:
-        return
-
-   
-    response = Ai.get_intent(prompt)
-    functions_list = response.get("function_called", dict())
-
-    print(functions_list)
-    result = ""
     
-    for action in functions_list:
-        for key, value in action.items():
-            result = result + str(dispatch(key.lower().strip(), value, plugins))
+    tools = fetch_runner_refs()
+    available_functions = create_availble_functions()
+
+    tools_called, content = Ai.get_ai_response(prompt, tools)
+
+    for tool in tools_called:
+
+        function_to_call = available_functions.get(tool.function.name)
+        if function_to_call:
+            print('Function output:', function_to_call(**tool.function.arguments))
+        else:
+            print('Function not found:', tool.function.name)
                        
 
 
-    final_result = f"The result of the action is the following data:\n{result}"
+   
 
     
     user_res = f"""

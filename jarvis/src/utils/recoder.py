@@ -1,15 +1,14 @@
 import speech_recognition as sr
 
-# Initialize recognizer
+
 r = sr.Recognizer()
 
-# Auto-detect available microphones
 def get_mic():
     try:
         mic_list = sr.Microphone.list_microphone_names()
         for index, name in enumerate(mic_list):
-            print(f"{index}: {name}")  # Show available mics
-        return sr.Microphone(device_index=3)  # Change this if needed
+            print(f"{index}: {name}")  
+        return sr.Microphone(device_index=3) 
     except Exception as e:
         print(f"Error detecting microphones: {e}")
         return None

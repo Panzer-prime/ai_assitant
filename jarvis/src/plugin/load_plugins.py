@@ -32,3 +32,14 @@ def load_plugins():
 
     return plugins
 
+
+
+
+def fetch_runner_refs():
+    plugins = load_plugins()
+
+    function_ref = []
+    for plugin in plugins:
+        function_ref.append(plugin.run)
+
+    return function_ref

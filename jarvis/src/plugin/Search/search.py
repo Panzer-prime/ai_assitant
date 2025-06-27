@@ -3,69 +3,7 @@ import requests
 import urllib.parse
 from trafilatura import fetch_url, extract
 from src.plugin.base_plugin import BasePluging
-
-from sentence_transformers import SentenceTransformer  # type: ignore
-import numpy as np
-import faiss
-import math
-import json
-
-class RAG:
-    def __init__(self):
-        self.model = SentenceTransformer("all-MiniLM-L6-v2")
-
-    def embed_text(self, text: str):
-        chunks = [chunk.strip() for chunk in text.split(".") if chunk.strip()]
-        embeddings = self.model.encode(chunks, show_progress_bar=True)
-        return chunks, embeddings
-
-    def build_index(self, embeddings):
-        embedding_matrix = np.array(embeddings)
-
-        faiss.normalize_L2(embedding_matrix)  
-        index = faiss.IndexFlatIP(embedding_matrix.shape[1])  
-        index.add(embedding_matrix)
-        return index
-
-    def search(self, query: str, index, chunks, top_k=5):
-        query_embedding = self.model.encode([query])
-        faiss.normalize_L2(query_embedding) 
-
-        distances, indices = index.search(query_embedding, top_k)
-
-        results = []
-        for idx in indices[0]:
-            results.append(chunks[idx])
-        return results
-    
-
-    def search_cos(self, query, embedings, chunks, top_k = 5):
-        query_embeding = self.model.encode([query])
-        faiss.normalize_L2(query_embeding)
-
-        results = []
-        for i, vec in enumerate(embedings):
-            similarity = self.cosine_similarity(query, vec)
-            results.append((chunks[i], similarity))
-
-        results.sort(key = lambda x: x[1], reverse=True)[:top_k]
-        return results
-
-
-    def cosine_similarity(self, vec1, vec2):
-
-        sum = 0
-        for x, y in zip(vec1, vec2):
-            sum += x * y
-        
-        return sum/ (self.magnitude(vec1) * self.magnitude(vec2))
-
-    def magnitude(self, X):
-        sum_squares = 0
-        for i in X:
-            sum_squares += i ** 2
-        
-        return math.sqrt(sum_squares)
+from src.utils.ai import RAG
     
 
 
@@ -103,17 +41,19 @@ class Search(BasePluging):
 
         return content
     
-    def run(self, querry):
+    def run(self, query):
         print("do we even run ")
-        r = RAG()
-        text = self.scrapp_websites(self.get_links(querry))
+        rag = RAG()
+        text = self.scrapp_websites(self.get_links(query))
+        chunks = rag.split_into_chunks(text, sentences_per_chunk=4)
 
-        chunks, embedings = r.embed_text(text)
-        index = r.build_index(embedings)
-        results =  r.search(querry, index, chunks)
-        print(results)
-        return results
 
-    def can_run(self,value: str):
-        return value == "search"
-    
+        embeddings = rag.embed_text(chunks)
+
+  
+        index = rag.build_index(embeddings)
+        top_chunks = rag.search(query, index, chunks, top_k=5)
+
+        return top_chunks
+
+

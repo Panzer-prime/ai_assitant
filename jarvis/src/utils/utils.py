@@ -1,6 +1,5 @@
-
-
-
+import json
+from src.plugin.load_plugins import load_plugins
 
 def write_in_json(obj):
     with open("jarvis/assets/plugins_metadata.json", 'w') as file:
@@ -8,10 +7,10 @@ def write_in_json(obj):
        file.write(json_obj)
 
 
-def create_metadata_file(plugins):
-    metadata = {}
+def create_available_functions():
+    plugins = load_plugins()
+    available = {}
     for plugin in plugins: 
-        metadata[plugin.name] = plugin.description
+        available[plugin.name] = plugin.run
+    return available
 
-    
-    write_in_json(metadata)

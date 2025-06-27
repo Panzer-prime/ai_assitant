@@ -4,13 +4,7 @@ ai agen in the style of jarvis from the marvel univers but with a sassy attitudu
 
 # 📝 To-Do:
 
--  Dynamic Intent Identification and Plugin Correlation System
 
-- [] Dynamic intent identification and correlation with the plugin system
-    What I need to do is, for each plugin, add an extra field: name and description.
-    Then, when I load these plugins, I generate a JSON file.
-    After that, using FAISS, I create an index and, using cosine similarity, I get the top N results.
-    Then I use the LLM to get a better filter, best working for the command.
 
 
 
@@ -20,7 +14,7 @@ ai agen in the style of jarvis from the marvel univers but with a sassy attitudu
     2. index the emmebedings 
     3. implement the retrieval and search 
 
-
+- switch the whole dispatch system you built to the NATIVE OLLAMA function calling
 
 # Fucntions to be implement to the ai agent 
 
